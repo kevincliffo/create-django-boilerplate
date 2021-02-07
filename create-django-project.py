@@ -17,6 +17,8 @@ class createDjangoProject:
         self.createCustomUserModel()
         self.createURLs()
         self.createViews()
+        self.modifyProjectURLs()
+        self.modifyProjectSettings()
 
     def createManagers(self):
         destinationManagers = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.appName, '\\managers.py'])
@@ -104,12 +106,41 @@ class createDjangoProject:
                      + self.projectName + ' && manage.py startapp ' + self.appName + '\n')        
         f.writelines('PAUSE')
         f.close()
-        print('batFile : ' + self.batchFilePath)
-
 
         subprocess.call([self.batchFilePath])
-        print('hello world')
 
+    def modifyProjectURLs(self):
+        projectUrls = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.projectName, '\\urls.py'])
+        lines = []
+        f = open(projectUrls, 'r')
+        for line in f:
+            ln = line.replace('\n', '')
+            ln = ln.replace("from django.urls import path", "from django.urls import path, include")
+            ln = ln.replace("path('admin/', admin.site.urls),", "path('admin/', admin.site.urls),\n    path('', include('"+ self.appName +".urls')),")
+            lines.append(ln)
+        f.close()
+        os.remove(projectUrls)
+
+        f = open(projectUrls, 'w')
+        for line in lines:
+            f.writelines(line + '\n')
+        f.close()
+
+    def modifyProjectSettings(self):
+        projectSettings = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.projectName, '\\settings.py'])
+        lines = []
+        f = open(projectSettings, 'r')
+        for line in f:
+            ln = line.replace('\n', '')
+            ln = ln.replace("'django.contrib.staticfiles',", "'django.contrib.staticfiles',\n    '" + self.appName + "',")
+            lines.append(ln)
+        f.close()
+        os.remove(projectSettings)
+
+        f = open(projectSettings, 'w')
+        for line in lines:
+            f.writelines(line + '\n')
+        f.close()
 
 if __name__ == '__main__':
     environmentName =input('Enter Environment Name with env_ prefix e.g env_school : ')
