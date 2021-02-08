@@ -19,6 +19,9 @@ class createDjangoProject:
         self.createViews()
         self.modifyProjectURLs()
         self.modifyProjectSettings()
+        self.createTemplatesAndStaticFolders()
+        self.createIndexHTMLPage()
+        self.createMigrationBatchFile()
 
     def createManagers(self):
         destinationManagers = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.appName, '\\managers.py'])
@@ -108,6 +111,28 @@ class createDjangoProject:
         f.close()
 
         subprocess.call([self.batchFilePath])
+        
+    def createMigrationBatchFile(self):
+        if os.path.exists(r'C:\_bats'):
+            pass
+        else:
+            os.mkdir(r'C:\_bats')
+
+        self.batchFilePath = ''.join([r'C:\_bats', '\\', 'migration.bat'])
+
+        f = open(self.batchFilePath, 'w')
+        f.writelines('@ECHO OFF\n')
+        scriptsFolderPath = ''.join([self.rootFolder, '\\', self.environmentName, '\\Scripts'])
+        scriptsFolderPath = scriptsFolderPath.replace('\\', '/')
+
+        projectFolder = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.projectName])
+        projectFolder = projectFolder.replace('\\', '/')
+        
+        f.writelines('cd ' + scriptsFolderPath +' && activate && cd.. && cd ' + self.projectName + ' && manage.py makemigrations && manage.py migrate\n')      
+        f.writelines('PAUSE')
+        f.close()
+
+        #subprocess.call([self.batchFilePath])
 
     def modifyProjectURLs(self):
         projectUrls = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.projectName, '\\urls.py'])
@@ -133,11 +158,35 @@ class createDjangoProject:
         for line in f:
             ln = line.replace('\n', '')
             ln = ln.replace("'django.contrib.staticfiles',", "'django.contrib.staticfiles',\n    '" + self.appName + "',")
+            ln = ln.replace("ROOT_URLCONF = '" + self.projectName + ".urls'", "ROOT_URLCONF = '" + self.projectName + ".urls'\nAUTH_USER_MODEL = '" + self.appName + ".CustomUser'")
             lines.append(ln)
         f.close()
         os.remove(projectSettings)
 
         f = open(projectSettings, 'w')
+        for line in lines:
+            f.writelines(line + '\n')
+        f.close()
+
+    def createTemplatesAndStaticFolders(self):
+        appFolder = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.appName])
+        os.makedirs(''.join([appFolder, '\\templates\\', self.appName]))
+        os.makedirs(''.join([appFolder, '\\static\\', self.appName]))
+
+    def createIndexHTMLPage(self):
+        destinationHTML = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.appName, '\\templates\\', self.appName, '\\index.html'])        
+        originHTML = ''.join([os.path.dirname(os.path.realpath(__file__)), '\\templates\\index.html'])
+
+        lines = []
+        f = open(originHTML, 'r')
+        for line in f:
+            ln = line.replace('\n', '')
+            ln = ln.replace('title_template', self.projectName.capitalize())
+            ln = ln.replace('project_name_template', self.projectName.capitalize())
+            lines.append(ln)
+        f.close()
+        
+        f = open(destinationHTML, 'w')
         for line in lines:
             f.writelines(line + '\n')
         f.close()
