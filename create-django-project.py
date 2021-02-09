@@ -106,7 +106,7 @@ class createDjangoProject:
                      + ' && cd ' + self.environmentName + ' && cd scripts '
                      + '&& activate && cd.. && python -m pip install --upgrade pip && pip install django '
                      + '&& django-admin startproject ' + self.projectName + ' && cd '
-                     + self.projectName + ' && manage.py startapp ' + self.appName + '\n')        
+                     + self.projectName + ' && python manage.py startapp ' + self.appName + '\n')        
         f.writelines('PAUSE')
         f.close()
 
@@ -128,7 +128,7 @@ class createDjangoProject:
         projectFolder = ''.join([self.rootFolder, '\\', self.environmentName, '\\', self.projectName, '\\', self.projectName])
         projectFolder = projectFolder.replace('\\', '/')
         
-        f.writelines('cd ' + scriptsFolderPath +' && activate && cd.. && cd ' + self.projectName + ' && manage.py makemigrations && manage.py migrate\n')      
+        f.writelines('cd ' + scriptsFolderPath +' && activate && cd.. && cd ' + self.projectName + ' && python manage.py makemigrations && python manage.py migrate\n')      
         f.writelines('PAUSE')
         f.close()
 
