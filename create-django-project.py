@@ -102,7 +102,7 @@ class createDjangoProject:
 
         f = open(self.batchFilePath, 'w')
         f.writelines('@ECHO OFF\n')
-        f.writelines('cd C:/_django && python -m venv ' + self.environmentName
+        f.writelines('cd C:/_Django && python -m venv ' + self.environmentName
                      + ' && cd ' + self.environmentName + ' && cd scripts '
                      + '&& activate && cd.. && python -m pip install --upgrade pip && pip install django '
                      + '&& django-admin startproject ' + self.projectName + ' && cd '
